@@ -380,11 +380,13 @@ app.listen(port,()=>{
 const Tasks=require('./models/tasks');
 
 const main=async()=>{
-    const task=await Tasks.findById('65326d48b826e5343b5a7985').task.populate('owner').execPopulate();
+    const task=await Tasks.findById('65326d48b826e5343b5a7985');
  
-    // await task.populate('owner').execPopulate();
+    await task.populate('owner').execPopulate();
     console.log(task);
 }
 
 main();
  
+
+// 6.10.0
