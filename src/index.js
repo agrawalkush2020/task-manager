@@ -377,16 +377,12 @@ app.listen(port,()=>{
     console.log('Server is on port '+port);
 })
 
-const Tasks=require('./models/tasks');
+// const Tasks=require('./models/tasks');
 
-const main=async()=>{
-    const task=await Tasks.findById('65326d48b826e5343b5a7985');
- 
-    await task.populate('owner').execPopulate();
-    console.log(task);
-}
+// const main=async()=>{
+//     const task=await Tasks.findById('65326d48b826e5343b5a7985');
+//     await task.populate('owner').execPopulate();
+//     console.log(task.owner);
+// }
 
-main();
- 
-
-// 6.10.0
+// main();
