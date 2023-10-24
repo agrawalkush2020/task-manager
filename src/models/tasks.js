@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 const validator=require('validator');
 
-const task=mongoose.model('Tasks',{      //model define kiya hai
+const taskschema = new mongoose.Schema({      //model define kiya hai
     description:{
         type:String,
         trim:true,
@@ -16,6 +16,9 @@ const task=mongoose.model('Tasks',{      //model define kiya hai
         required:true,
         ref:'Users'
     }
+},{
+    timestamps:true
 });
 
+const task=mongoose.model('Tasks',taskschema);
 module.exports=task;

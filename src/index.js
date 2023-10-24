@@ -361,6 +361,90 @@
 
 
 // video -> 114
+// const express=require('express');
+// require('./db/mongoose'); 
+// const userrouter=require('./routers/user');
+// const taskrouter=require('./routers/task');
+
+// const app=express();
+// const port=process.env.PORT || 3000;
+// app.use(express.json());         //isse json file object mein change ho gyi 
+
+// app.use(userrouter);
+// app.use(taskrouter);
+
+// app.listen(port,()=>{
+//     console.log('Server is on port '+port);
+// })
+
+
+
+// const Tasks=require('./models/tasks');
+// const Users=require('./models/users');
+
+// const main=async()=>{
+//     // const task=await Tasks.findById('65326d48b826e5343b5a7985');
+//     // await task.populate('owner');
+//     // console.log(task.owner);
+
+//     // const user=await Users.findById('6533ef9f3e47e93b72f5dd79');
+//     // await user.populate('tasks');
+//     // console.log(user.tasks);
+// }
+
+// main();
+
+
+
+
+
+// video -> 123
+// const express=require('express');
+// require('./db/mongoose'); 
+// const userrouter=require('./routers/user');
+// const taskrouter=require('./routers/task');
+
+// const app=express();
+// const port=process.env.PORT || 3000;
+// app.use(express.json());         //isse json file object mein change ho gyi 
+
+
+// const multer=require('multer');
+// const upload=multer({
+//     dest:'images',
+//     limits:{
+//         fileSize:1000000       // size in bytes
+//     },
+//     fileFilter(req,file,cb){
+//         // if(!file.originalname.endsWith('.pdf')){
+//         //     return cb(new Error('please upload the pdf'),undefined);
+//         // }
+//         if(!file.originalname.match(/\.(doc|docx)$/)){
+//             return cb(new Error('please upload a word file !!'));
+//         }
+
+//         cb(undefined,true);
+//     }
+// })
+// app.post('/upload',upload.single('upload'), (req,res)=>{
+//     res.send();
+// })
+
+
+
+
+// app.use(userrouter);
+// app.use(taskrouter);
+
+// app.listen(port,()=>{
+//     console.log('Server is on port '+port);
+// })
+
+
+
+
+
+// video-> 126  ab error handling add krenge upload mein
 const express=require('express');
 require('./db/mongoose'); 
 const userrouter=require('./routers/user');
@@ -370,6 +454,33 @@ const app=express();
 const port=process.env.PORT || 3000;
 app.use(express.json());         //isse json file object mein change ho gyi 
 
+
+
+
+const multer=require('multer');
+const upload=multer({
+    dest:'images',
+    limits:{
+        fileSize:1000000       // size in bytes
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.match(/\.(doc|docx)$/)){
+            return cb(new Error('please upload a word file !!'));
+        }
+
+        cb(undefined,true);
+    }
+})
+app.post('/upload',upload.single('upload'), (req,res)=>{
+    res.send();
+},(error,req,res,next)=>{
+    res.status(400).send({error:error.message});
+})
+
+
+
+
+
 app.use(userrouter);
 app.use(taskrouter);
 
@@ -377,14 +488,7 @@ app.listen(port,()=>{
     console.log('Server is on port '+port);
 })
 
+ 
 
 
-const Tasks=require('./models/tasks');
 
-const main=async()=>{
-    const task=await Tasks.findById('65326d48b826e5343b5a7985').populate('owner').execPopulate();
-    // await task.populate('owner').execPopulate();
-    console.log(task);
-}
-
-main();

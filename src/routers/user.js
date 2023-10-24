@@ -2,6 +2,7 @@ const express=require('express');
 const Users=require('../models/users');
 const auth=require('../middleware/auth');
 const userrouter=new express.Router();
+const multer=require('multer');
 
 userrouter.post('/users',async(req,res)=>{
     const user=new Users(req.body);
@@ -73,7 +74,6 @@ userrouter.patch('/users/me',auth,async(req,res)=>{
     
 })
 
- 
 userrouter.delete('/users/me',auth,async(req,res)=>{
     try {
         req.user=await req.user.deleteOne();    //pichli do lines ki jgh yh line likhdi 
@@ -81,6 +81,32 @@ userrouter.delete('/users/me',auth,async(req,res)=>{
     } catch (error) {
         res.status(500).send(error);
     }
+})
+
+const upload=multer({
+    limits:{
+        fileSize:1000000
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+            return cb(new Error('please upload a image !!'));
+        }
+        cb(undefined,true);
+    }
+
+})
+userrouter.post('/users/me/avatar', auth, upload.single('avatar'), async (req,res)=>{
+    req.user.avatar=req.file.buffer;
+    await req.user.save();
+    res.status(200).send();
+},(error,req,res,next)=>{
+    res.status(400).send({error:error.message})
+})
+
+userrouter.delete('/users/me/avatar', auth, async (req,res)=>{
+    req.user.avatar=undefined;
+    await req.user.save();
+    res.send();
 })
 
 module.exports=userrouter;

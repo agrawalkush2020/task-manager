@@ -19,22 +19,45 @@ taskrouter.post('/tasks', auth, async(req,res)=>{
 
 })
 
-taskrouter.get('/tasks',async(req,res)=>{
+// tasks?completed=true
+// tasks?limit=x&skip=10 -> skipping first 10 results and then getting the 10 results
+// tasks?sortby=createdAt:desc   -> sorting technique of results
+taskrouter.get('/tasks', auth, async(req,res)=>{
+    const match={};
+    const sort={};
+
+    if(req.query.completed){
+        match.completed=req.query.completed=='true'
+    }
+
+    if(req.query.sortby){
+        const parts=req.query.sortby.split(':');
+        sort[parts[0]]=parts[1]==='desc'? -1 : 1;
+    }
 
     try {
-        const tasks=await Tasks.find();
-        res.send(tasks);
+        await req.user.populate({
+            path:'tasks',
+            match,
+            options:{
+                limit:parseInt(req.query.limit),   // maked this dynamic
+                skip:parseInt(req.query.skip),     // skip option 
+                sort 
+            }
+        });
+        res.send(req.user.tasks);
     } catch (error) {
         res.status(500).send(error);
     }
 
 })
 
-taskrouter.get('/tasks/:id',async(req,res)=>{
+taskrouter.get('/tasks/:id', auth, async(req,res)=>{
     const _id=req.params.id;
 
     try {
-        const task=await Tasks.findOne({_id});
+        // const task=await Tasks.findOne({_id});
+        const task=await Tasks.findOne({_id,owner:req.user._id})
         if(!task) return res.status(404).send();
         res.send(task);
     } catch (error) {
@@ -43,7 +66,7 @@ taskrouter.get('/tasks/:id',async(req,res)=>{
 
 })
 
-taskrouter.patch('/tasks/:id',async(req,res)=>{    //for the update
+taskrouter.patch('/tasks/:id', auth, async(req,res)=>{    //for the update
     const updates=Object.keys(req.body);
     const allowedupdates=['desciption','completed'];
     const isvalidoperation=updates.every((update)=>{
@@ -52,16 +75,13 @@ taskrouter.patch('/tasks/:id',async(req,res)=>{    //for the update
 
     if(!isvalidoperation) return res.status(400).send({error:'invalid operation'});
 
-    try {
-
-        const task=await Tasks.findById(req.params.id);
+    try { 
+        const task=await Tasks.findOne({_id:req.params.id,owner:req.user._id});
         if(!task) return res.status(404).send();
 
-        updates.forEach((update)=>task[update]=req.body[update]);
-        await task.save();
+        updates.forEach((update) => task[update]=req.body[update]);
 
-        // const task=await Tasks.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true})
-        
+        await task.save();
         res.send(task);
     } catch (error) {
         res.status(400).send(error);
@@ -69,9 +89,9 @@ taskrouter.patch('/tasks/:id',async(req,res)=>{    //for the update
 
 })
 
-taskrouter.delete('/tasks/:id', async(req,res)=>{
+taskrouter.delete('/tasks/:id', auth, async(req,res)=>{
     try {
-        const task=await Tasks.findByIdAndDelete(req.params.id);
+        const task=await Tasks.findOneAndDelete({_id:req.params.id,owner:req.user._id});
         if(!task) return res.status(404).send();
         res.send(task);
     } catch (error) {
